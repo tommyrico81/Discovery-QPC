@@ -48,12 +48,13 @@ class DetailsJsonGzipRenderer(renderers.BaseRenderer):
         if details_report is None:
             return None
 
+        json_file_name = 'details_' + str(report_id) + '.json'
         json_buffer = io.BytesIO(json.dumps(report_dict).encode('utf-8'))
         tar_buffer = io.BytesIO()
         with tarfile.TarFile(fileobj=tar_buffer,
                              mode='w',
                              debug=3) as tar_file:
-            info = tarfile.TarInfo(name='report.json')
+            info = tarfile.TarInfo(name=json_file_name)
             info.size = len(json_buffer.getvalue())
             tar_file.addfile(tarinfo=info, fileobj=json_buffer)
         tar_buffer.seek(0)
