@@ -21,6 +21,13 @@
   ignore_errors: yes
   when: 'user_has_sudo'
 
+- name: gather date.file_create fact
+  raw: ls -lact --full-time /etc |awk 'END {print $6, $7}'
+  register: internal_date_file_cmd
+  become: yes
+  ignor_errors: yes
+  when: 'user_has_sudo'
+
 - name: extract result value for date.anaconda_log
   set_fact:
     date_anaconda_log: "{{ internal_date_anaconda_log_cmd['stdout'] | trim | default('') }}"
