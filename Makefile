@@ -7,8 +7,6 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
-OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*,*/deploy/*,*/local_gunicorn.conf.py
-
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                to show this message"
@@ -35,15 +33,14 @@ clean:
 	rm -rf quipucords/quipucords/templates
 
 test:
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/
+	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto
 
 test-case:
 	echo $(pattern)
 	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ -p $(pattern)
 
 test-coverage:
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True coverage run --source=quipucords/ quipucords/manage.py test -v 2 quipucords/
-	coverage report -m --omit $(OMIT_PATTERNS)
+	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto --cov=quipucords
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
@@ -68,7 +65,7 @@ server-set-superuser:
 server-init: server-migrate server-set-superuser
 
 setup-postgres:
-	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6.10
+	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:14.1
 
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
